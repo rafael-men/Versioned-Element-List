@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { FakeElementListRepository } from '../helpers/fakes';
 import { ReorderElementUseCase } from '../../src/use-cases/lists/reorder-element';

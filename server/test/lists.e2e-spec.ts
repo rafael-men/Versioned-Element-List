@@ -1,24 +1,34 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
-import { User } from '../src/domain/entities/user';
 import { ChangeType } from '../src/domain/enums/change-type';
 
 describe('Listas (e2e)', () => {
   let app: INestApplication;
-  let dataSource: DataSource;
-  let userId: string;
+  let token: string;
+  let otherUserToken: string;
 
-  const createUser = async () => {
-    return dataSource.getRepository(User).save({
-      email: `e2e-${Date.now()}-${Math.random()}@test.com`,
-      password: 'senha-criptografada',
-    });
+  const registerAndLogin = async () => {
+    const email = `e2e-${Date.now()}-${Math.random()}@test.com`;
+    const password = 'Abc123';
+
+    await request(app.getHttpServer())
+      .post('/users/register')
+      .send({ email, password })
+      .expect(201);
+
+    const login = await request(app.getHttpServer())
+      .post('/users/login')
+      .send({ email, password })
+      .expect(200);
+
+    return login.body.token as string;
   };
 
-  const auth = (id?: string) => ({ 'x-user-id': id ?? userId });
+  const auth = (t?: string) => ({
+    Authorization: `Bearer ${t ?? token}`,
+  });
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -35,8 +45,8 @@ describe('Listas (e2e)', () => {
     );
     await app.init();
 
-    dataSource = app.get(DataSource);
-    userId = (await createUser()).id;
+    token = await registerAndLogin();
+    otherUserToken = await registerAndLogin();
   });
 
   afterAll(async () => {
@@ -52,10 +62,20 @@ describe('Listas (e2e)', () => {
     expect(res.status).toBe(201);
     expect(res.body.id).toEqual(expect.any(String));
     expect(res.body.version).toBe(1);
-    expect(res.body.elements.map((el: { content: string }) => el.content)).toEqual([
-      'Arroz',
-      'Feijão',
-    ]);
+    expect(
+      res.body.elements.map((el: { content: string }) => el.content),
+    ).toEqual(['Arroz', 'Feijão']);
+  });
+
+  it('rejeita acesso sem token', async () => {
+    await request(app.getHttpServer()).get('/lists').expect(401);
+  });
+
+  it('rejeita token inválido', async () => {
+    await request(app.getHttpServer())
+      .get('/lists')
+      .set({ Authorization: 'Bearer token-invalido' })
+      .expect(401);
   });
 
   it('rejeita body inválido com 400', async () => {
@@ -108,11 +128,9 @@ describe('Listas (e2e)', () => {
       .set(auth())
       .expect(200);
 
-    expect(list.body.elements.map((el: { content: string }) => el.content)).toEqual([
-      'B',
-      'C',
-      'A1',
-    ]);
+    expect(
+      list.body.elements.map((el: { content: string }) => el.content),
+    ).toEqual(['B', 'C', 'A1']);
 
     await request(app.getHttpServer())
       .delete(`/lists/${listId}/elements/${b.body.added.id}`)
@@ -124,10 +142,9 @@ describe('Listas (e2e)', () => {
       .set(auth())
       .expect(200);
 
-    expect(afterDelete.body.elements.map((el: { content: string }) => el.content)).toEqual([
-      'C',
-      'A1',
-    ]);
+    expect(
+      afterDelete.body.elements.map((el: { content: string }) => el.content),
+    ).toEqual(['C', 'A1']);
   });
 
   it('registra histórico e restaura uma versão anterior', async () => {
@@ -150,10 +167,9 @@ describe('Listas (e2e)', () => {
       .expect(200);
 
     expect(history.body.currentVersion).toBe(2);
-    expect(history.body.versions.map((v: { changeType: string }) => v.changeType)).toEqual([
-      ChangeType.ADD,
-      ChangeType.CREATE,
-    ]);
+    expect(
+      history.body.versions.map((v: { changeType: string }) => v.changeType),
+    ).toEqual([ChangeType.ADD, ChangeType.CREATE]);
 
     const restored = await request(app.getHttpServer())
       .post(`/lists/${listId}/restore/1`)
@@ -162,9 +178,9 @@ describe('Listas (e2e)', () => {
 
     expect(restored.body.restoredFromVersion).toBe(1);
     expect(restored.body.version).toBe(3);
-    expect(restored.body.elements.map((el: { content: string }) => el.content)).toEqual([
-      'X',
-    ]);
+    expect(
+      restored.body.elements.map((el: { content: string }) => el.content),
+    ).toEqual(['X']);
 
     await request(app.getHttpServer())
       .post(`/lists/${listId}/elements`)
@@ -178,14 +194,12 @@ describe('Listas (e2e)', () => {
       .expect(200);
 
     expect(afterRestore.body.version).toBe(4);
-    expect(afterRestore.body.elements.map((el: { content: string }) => el.content)).toEqual([
-      'X',
-      'Z',
-    ]);
+    expect(
+      afterRestore.body.elements.map((el: { content: string }) => el.content),
+    ).toEqual(['X', 'Z']);
   });
 
   it('não permite acessar listas de outros usuários', async () => {
-    const other = await createUser();
     const created = await request(app.getHttpServer())
       .post('/lists')
       .set(auth())
@@ -194,7 +208,7 @@ describe('Listas (e2e)', () => {
 
     await request(app.getHttpServer())
       .get(`/lists/${created.body.id}`)
-      .set(auth(other.id))
+      .set(auth(otherUserToken))
       .expect(404);
   });
 
@@ -213,10 +227,8 @@ describe('Listas (e2e)', () => {
       .expect(200);
 
     expect(updated.body.version).toBe(2);
-    expect(updated.body.elements.map((el: { content: string }) => el.content)).toEqual([
-      '1',
-      '2',
-      '3',
-    ]);
+    expect(
+      updated.body.elements.map((el: { content: string }) => el.content),
+    ).toEqual(['1', '2', '3']);
   });
 });

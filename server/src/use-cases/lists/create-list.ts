@@ -4,6 +4,7 @@ import {
   ELEMENT_LIST_REPOSITORY,
   type ElementListRepository,
 } from '../ports/element-list.repository';
+import { sanitizeText } from '../common/sanitize-text';
 
 export interface CreateListInput {
   name: string;
@@ -18,10 +19,11 @@ export class CreateListUseCase {
   ) {}
 
   async execute(userId: string, input: CreateListInput) {
+    const name = sanitizeText(input.name, 'nome');
     const elements = (input.elements ?? []).map((content) => ({
       id: randomUUID(),
-      content,
+      content: sanitizeText(content, 'elemento'),
     }));
-    return this.lists.create(userId, input.name, elements);
+    return this.lists.create(userId, name, elements);
   }
 }

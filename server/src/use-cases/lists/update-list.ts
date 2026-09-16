@@ -5,6 +5,7 @@ import {
   ELEMENT_LIST_REPOSITORY,
   type ElementListRepository,
 } from '../ports/element-list.repository';
+import { sanitizeText } from '../common/sanitize-text';
 
 export interface UpdateListInput {
   name: string;
@@ -19,13 +20,14 @@ export class UpdateListUseCase {
   ) {}
 
   async execute(userId: string, listId: string, input: UpdateListInput) {
+    const name = sanitizeText(input.name, 'nome');
     const elements = input.elements.map((content) => ({
       id: randomUUID(),
-      content,
+      content: sanitizeText(content, 'elemento'),
     }));
 
     const state = await this.lists.commit(userId, listId, {
-      name: input.name,
+      name,
       elements,
       changeType: ChangeType.REPLACE,
       description: 'Lista atualizada.',

@@ -6,6 +6,7 @@ import { ELEMENT_LIST_REPOSITORY } from '../../use-cases/ports/element-list.repo
 import { LIST_VERSION_REPOSITORY } from '../../use-cases/ports/list-version.repository';
 import { TypeOrmElementListRepository } from '../../infrastructure/repositories/typeorm-element-list.repository';
 import { TypeOrmListVersionRepository } from '../../infrastructure/repositories/typeorm-list-version.repository';
+import { SecurityModule } from '../../infrastructure/security/security.module';
 import { CreateListUseCase } from '../../use-cases/lists/create-list';
 import { GetAllListsUseCase } from '../../use-cases/lists/get-all-lists';
 import { GetListUseCase } from '../../use-cases/lists/get-list.use-case';
@@ -22,7 +23,10 @@ import { RestoreListUseCase } from '../../use-cases/lists/restore-list';
 import { ListsController } from './lists.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ElementList, ListVersion])],
+  imports: [
+    TypeOrmModule.forFeature([ElementList, ListVersion]),
+    SecurityModule,
+  ],
   controllers: [ListsController],
   providers: [
     {

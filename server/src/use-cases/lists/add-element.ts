@@ -5,6 +5,7 @@ import {
   ELEMENT_LIST_REPOSITORY,
   type ElementListRepository,
 } from '../ports/element-list.repository';
+import { sanitizeText } from '../common/sanitize-text';
 
 export interface AddElementInput {
   content: string;
@@ -23,11 +24,12 @@ export class AddElementUseCase {
       throw new NotFoundException('Lista não encontrada.');
     }
 
-    const added = { id: randomUUID(), content: input.content };
+    const content = sanitizeText(input.content, 'conteúdo');
+    const added = { id: randomUUID(), content };
     const updated = await this.lists.commit(userId, listId, {
       elements: [...state.elements, added],
       changeType: ChangeType.ADD,
-      description: `Elemento adicionado: "${input.content.slice(0, 50)}".`,
+      description: `Elemento adicionado: "${content.slice(0, 50)}".`,
     });
 
     return { version: updated!.version, elements: updated!.elements, added };

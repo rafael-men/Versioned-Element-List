@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { FakeElementListRepository } from '../helpers/fakes';
 import { PatchListUseCase } from '../../src/use-cases/lists/patch-list';
@@ -42,20 +39,40 @@ describe('PatchListUseCase', () => {
       elements: [{ id: a.id, content: 'A1' }],
     });
 
-    expect(result.elements).toEqual([
-      { id: a.id, content: 'A1' },
-      b,
-    ]);
+    expect(result.elements).toEqual([{ id: a.id, content: 'A1' }, b]);
     expect(result.version).toBe(2);
+  });
+
+  it('escapa HTML no nome e nos elementos editados', async () => {
+    const userId = randomUUID();
+    const [a] = [{ id: randomUUID(), content: 'A' }];
+    const state = await fake.create(userId, 'Lista', [a]);
+
+    const result = await useCase.execute(userId, state.id, {
+      name: '<i>Renomeada</i>',
+      elements: [{ id: a.id, content: '<svg onload=alert(1)>' }],
+    });
+
+    expect(result.name).toBe('&lt;i&gt;Renomeada&lt;/i&gt;');
+    expect(result.elements[0].content).toBe('&lt;svg onload=alert(1)&gt;');
+  });
+
+  it('rejeita caracteres de controle no nome', async () => {
+    const userId = randomUUID();
+    const state = await fake.create(userId, 'Lista', []);
+
+    await expect(
+      useCase.execute(userId, state.id, { name: 'X\u0001' }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('lança BadRequestException quando nenhuma alteração é informada', async () => {
     const userId = randomUUID();
     const state = await fake.create(userId, 'Lista', []);
 
-    await expect(
-      useCase.execute(userId, state.id, {}),
-    ).rejects.toThrow(BadRequestException);
+    await expect(useCase.execute(userId, state.id, {})).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('lança NotFoundException para elemento inexistente', async () => {

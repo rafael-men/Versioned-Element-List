@@ -4,6 +4,7 @@ import {
   ELEMENT_LIST_REPOSITORY,
   type ElementListRepository,
 } from '../ports/element-list.repository';
+import { sanitizeText } from '../common/sanitize-text';
 
 export interface EditElementInput {
   content: string;
@@ -33,14 +34,15 @@ export class EditElementUseCase {
     }
 
     const previous = state.elements[index].content;
+    const content = sanitizeText(input.content, 'conteúdo');
     const elements = state.elements.map((e, i) =>
-      i === index ? { ...e, content: input.content } : e,
+      i === index ? { ...e, content } : e,
     );
 
     const updated = await this.lists.commit(userId, listId, {
       elements,
       changeType: ChangeType.EDIT,
-      description: `Elemento editado: "${previous.slice(0, 30)}" -> "${input.content.slice(0, 30)}".`,
+      description: `Elemento editado: "${previous.slice(0, 30)}" -> "${content.slice(0, 30)}".`,
     });
 
     return { version: updated!.version, elements: updated!.elements };

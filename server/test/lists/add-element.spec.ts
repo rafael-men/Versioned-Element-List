@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { FakeElementListRepository } from '../helpers/fakes';
 import { AddElementUseCase } from '../../src/use-cases/lists/add-element';
@@ -44,5 +44,25 @@ describe('AddElementUseCase', () => {
     await expect(
       useCase.execute(randomUUID(), randomUUID(), { content: 'X' }),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  it('escapa HTML no conteúdo para prevenir XSS', async () => {
+    const userId = randomUUID();
+    const state = await fake.create(userId, 'Lista', []);
+
+    const result = await useCase.execute(userId, state.id, {
+      content: '<script>alert(1)</script>',
+    });
+
+    expect(result.added.content).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+
+  it('rejeita caracteres de controle no conteúdo', async () => {
+    const userId = randomUUID();
+    const state = await fake.create(userId, 'Lista', []);
+
+    await expect(
+      useCase.execute(userId, state.id, { content: 'abc\u0000def' }),
+    ).rejects.toThrow(BadRequestException);
   });
 });

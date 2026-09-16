@@ -9,9 +9,11 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUser as CurrentUserType } from '../common/decorators/current-user.decorator';
+import { CurrentUser } from '../../infrastructure/security/current-user.decorator';
+import { CurrentUser as CurrentUserType } from '../../infrastructure/security/current-user.decorator';
+import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
 import { CreateListUseCase } from '../../use-cases/lists/create-list';
 import { GetAllListsUseCase } from '../../use-cases/lists/get-all-lists';
 import { GetListUseCase } from '../../use-cases/lists/get-list.use-case';
@@ -33,6 +35,7 @@ import { EditElementDto } from '../dto/edit-element.dto';
 import { ReorderElementDto } from '../dto/reorder-element.dto';
 
 @Controller('lists')
+@UseGuards(JwtAuthGuard)
 export class ListsController {
   constructor(
     private readonly createList: CreateListUseCase,

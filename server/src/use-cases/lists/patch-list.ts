@@ -9,6 +9,7 @@ import {
   ELEMENT_LIST_REPOSITORY,
   type ElementListRepository,
 } from '../ports/element-list.repository';
+import { sanitizeText } from '../common/sanitize-text';
 
 export interface ElementPatchInput {
   id: string;
@@ -34,6 +35,8 @@ export class PatchListUseCase {
     }
 
     const nameChanged = input.name !== undefined;
+    const safeName =
+      input.name !== undefined ? sanitizeText(input.name, 'nome') : undefined;
     const elements = [...state.elements];
     const patches = input.elements ?? [];
 
@@ -45,7 +48,8 @@ export class PatchListUseCase {
         );
       }
       if (patch.content !== undefined) {
-        elements[index] = { ...elements[index], content: patch.content };
+        const content = sanitizeText(patch.content, 'conteúdo');
+        elements[index] = { ...elements[index], content };
       }
     }
 
@@ -57,7 +61,7 @@ export class PatchListUseCase {
 
     const hasElementEdits = patches.length > 0;
     const updated = await this.lists.commit(userId, listId, {
-      name: input.name,
+      name: safeName,
       elements,
       changeType: hasElementEdits ? ChangeType.EDIT : ChangeType.RENAME,
       description: hasElementEdits

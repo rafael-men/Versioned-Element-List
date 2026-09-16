@@ -12,7 +12,9 @@ describe('GetAllListsUseCase', () => {
   });
 
   it('retorna apenas as listas do usuário', async () => {
-    await fake.create(randomUUID(), 'Compras', [{ id: randomUUID(), content: 'A' }]);
+    await fake.create(randomUUID(), 'Compras', [
+      { id: randomUUID(), content: 'A' },
+    ]);
     await fake.create('usuário', 'Tarefas', [
       { id: randomUUID(), content: 'X' },
       { id: randomUUID(), content: 'Y' },

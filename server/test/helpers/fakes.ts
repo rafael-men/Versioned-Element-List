@@ -11,6 +11,9 @@ import type {
   ListChange,
 } from '../../src/use-cases/ports/element-list.repository';
 import type { ListVersionRepository } from '../../src/use-cases/ports/list-version.repository';
+import type { PublicUser, UserRecord } from '../../src/domain/models/user';
+import type { UserRepository } from '../../src/use-cases/ports/user.repository';
+import type { TokenGenerator } from '../../src/use-cases/ports/token-generator';
 
 export class FakeElementListRepository implements ElementListRepository {
   private readonly lists = new Map<string, ListState>();
@@ -146,5 +149,30 @@ export class FakeListVersionRepository implements ListVersionRepository {
         (v) => v.versionNumber === versionNumber,
       ) ?? null
     );
+  }
+}
+
+export class FakeUserRepository implements UserRepository {
+  readonly users: UserRecord[] = [];
+
+  async findByEmail(email: string): Promise<UserRecord | null> {
+    return this.users.find((user) => user.email === email) ?? null;
+  }
+
+  async create(email: string, passwordHash: string): Promise<PublicUser> {
+    const user: UserRecord = {
+      id: randomUUID(),
+      email,
+      passwordHash,
+      createdAt: new Date(),
+    };
+    this.users.push(user);
+    return { id: user.id, email: user.email, createdAt: user.createdAt };
+  }
+}
+
+export class FakeTokenGenerator implements TokenGenerator {
+  sign(user: PublicUser): Promise<string> {
+    return Promise.resolve(`token-${user.id}`);
   }
 }

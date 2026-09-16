@@ -46,8 +46,8 @@ describe('GetListHistoryUseCase', () => {
   });
 
   it('lança NotFoundException para lista inexistente', async () => {
-    await expect(
-      useCase.execute(randomUUID(), randomUUID()),
-    ).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(randomUUID(), randomUUID())).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

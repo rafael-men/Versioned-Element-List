@@ -27,9 +27,9 @@ describe('GetListUseCase', () => {
   });
 
   it('lança NotFoundException quando a lista não existe', async () => {
-    await expect(
-      useCase.execute(randomUUID(), randomUUID()),
-    ).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(randomUUID(), randomUUID())).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('lança NotFoundException para lista de outro usuário', async () => {
