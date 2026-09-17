@@ -38,10 +38,7 @@ export class FakeElementListRepository implements ElementListRepository {
     return list;
   }
 
-  async findState(
-    userId: string,
-    listId: string,
-  ): Promise<ListState | null> {
+  async findState(userId: string, listId: string): Promise<ListState | null> {
     if (this.owners.get(listId) !== userId) return null;
     return this.lists.get(listId) ?? null;
   }
@@ -94,11 +91,7 @@ export class FakeListVersionRepository implements ListVersionRepository {
   private readonly versions = new Map<string, ListVersionDetail[]>();
   private readonly owners = new Map<string, string>();
 
-  seed(
-    userId: string,
-    listId: string,
-    version: ListVersionDetail,
-  ): void {
+  seed(userId: string, listId: string, version: ListVersionDetail): void {
     this.owners.set(listId, userId);
     const list = this.versions.get(listId) ?? [];
     list.push(version);
@@ -125,7 +118,9 @@ export class FakeListVersionRepository implements ListVersionRepository {
     const list = this.versions.get(listId) ?? [];
     return {
       listId,
-      currentVersion: list.length ? Math.max(...list.map((v) => v.versionNumber)) : 0,
+      currentVersion: list.length
+        ? Math.max(...list.map((v) => v.versionNumber))
+        : 0,
       versions: [...list]
         .sort((a, b) => b.versionNumber - a.versionNumber)
         .map((v) => ({

@@ -1,7 +1,14 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class AddElementDto {
+  @ApiProperty({
+    description: 'Conteúdo do novo elemento.',
+    example: 'novo item',
+    minLength: 1,
+    maxLength: 2000,
+  })
   @IsString({ message: 'O campo content deve ser uma string.' })
   @Length(1, 2000, {
     message: 'O campo content deve ter entre 1 e 2000 caracteres.',

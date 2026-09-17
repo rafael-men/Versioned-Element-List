@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './infrastructure/config/data/data-source';
 import { ListsModule } from './application/lists/lists.module';
@@ -7,6 +8,7 @@ import { SecurityModule } from './infrastructure/security/security.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(dataSourceOptions),
     SecurityModule,
     ListsModule,

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -11,6 +12,11 @@ const normalizeEmail = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim().toLowerCase() : value;
 
 export class RegisterDto {
+  @ApiProperty({
+    description: 'E-mail do usuário. Será normalizado para minúsculas.',
+    example: 'usuario@exemplo.com',
+    maxLength: 255,
+  })
   @IsNotEmpty({ message: 'O campo email é obrigatório.' })
   @IsEmail({}, { message: 'Informe um e-mail válido.' })
   @Length(3, 255, {
@@ -19,6 +25,13 @@ export class RegisterDto {
   @Transform(normalizeEmail)
   email!: string;
 
+  @ApiProperty({
+    description:
+      'Senha do usuário. Deve ter no mínimo 6 caracteres, ao menos um número e uma letra maiúscula e uma minúscula.',
+    example: 'Senha123',
+    minLength: 6,
+    maxLength: 255,
+  })
   @IsNotEmpty({ message: 'O campo password é obrigatório.' })
   @IsString({ message: 'O campo password deve ser uma string.' })
   @Length(6, 255, {
