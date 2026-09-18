@@ -1,6 +1,6 @@
 # Lista Versionada
 
-Aplicação web para gerenciamento de listas de elementos, com operações de edição, reordenação e histórico de versões.
+Aplicação web para operação de listas de elementos, com edição, reordenação e histórico acessível e refatorável de versões.
 
 ## Tecnologias
 
@@ -156,12 +156,7 @@ Para executar o Cypress em modo interativo, inicie o frontend e use `npm run tes
 ## Decisões e limitações
 
 - Os snapshots completos simplificam a consulta e a restauração, ao custo de armazenar o estado inteiro a cada alteração.
-- O TypeORM está configurado com `synchronize: true` para facilitar o desenvolvimento local. Em produção, use migrations e desative essa opção.
+- O TypeORM está configurado com `synchronize: true` para facilitar o desenvolvimento.
 - O frontend depende do backend e do banco para carregar listas e históricos.
 - A configuração padrão usa `localhost`; em ambientes diferentes, ajuste `CORS_ORIGIN`, `VITE_API_BASE_URL` e as variáveis do banco.
 
-## Entrega
-
-Inclua o código-fonte, `package.json`, arquivos de configuração, Docker Compose e documentação. Não inclua `node_modules`, diretórios `dist` ou `coverage`, arquivos `.env`, senhas, tokens ou qualquer informação pessoal.
-
-# Versioned-Element-List
