@@ -101,21 +101,19 @@ export class TypeOrmElementListRepository implements ElementListRepository {
   ): Promise<ListState | null> {
     const list = await this.listRepo.findOne({
       where: { id: listId, user: { id: userId } },
-      relations: { versions: true },
     });
     if (!list) {
       return null;
     }
 
-    const newerVersions = list.versions.filter(
-      (item) => item.versionNumber > version,
-    );
-    if (newerVersions.length > 0) {
-      await this.versionRepo.remove(newerVersions);
-    }
-
-    list.currentVersion = version;
+    list.currentVersion += 1;
     await this.listRepo.save(list);
+
+    await this.insertVersion(list, {
+      elements,
+      changeType: ChangeType.RESTORE,
+      description: `Restaurada a partir da versão ${version}.`,
+    });
 
     return this.toState(list, elements);
   }

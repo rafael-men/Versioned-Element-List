@@ -24,7 +24,7 @@ function Login() {
          await login({ email, password })
          navigate('/')
       } catch (err) {
-         setError(err instanceof Error ? err.message : 'Não foi possível entrar.')
+         setError(err instanceof Error ? err.message : 'Erro ao realizar login.')
       }
    }
 

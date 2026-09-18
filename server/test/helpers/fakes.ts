@@ -90,7 +90,7 @@ export class FakeElementListRepository implements ElementListRepository {
 
     const updated: ListState = {
       ...current,
-      version,
+      version: current.version + 1,
       elements,
       updatedAt: new Date(),
     };

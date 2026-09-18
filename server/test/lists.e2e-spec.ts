@@ -182,6 +182,18 @@ describe('Listas (e2e)', () => {
       restored.body.elements.map((el: { content: string }) => el.content),
     ).toEqual(['X']);
 
+    const historyAfterRestore = await request(app.getHttpServer())
+      .get(`/lists/${listId}/history`)
+      .set(auth())
+      .expect(200);
+
+    expect(historyAfterRestore.body.currentVersion).toBe(3);
+    expect(
+      historyAfterRestore.body.versions.map(
+        (v: { changeType: string }) => v.changeType,
+      ),
+    ).toEqual([ChangeType.RESTORE, ChangeType.ADD, ChangeType.CREATE]);
+
     await request(app.getHttpServer())
       .post(`/lists/${listId}/elements`)
       .set(auth())

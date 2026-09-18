@@ -1,11 +1,11 @@
 import { randomEmail, randomPassword } from '../utils'
-import { mockAuth, mockAddUser, mockLists } from '../support/mocks'
+import { mockAuthenticatedLists, mockAuth, mockAddUser } from '../support/mocks'
 
 describe('API de autenticação (mockada)', () => {
   beforeEach(() => {
     cy.clearLocalStorage()
     mockAuth()
-    mockLists()
+    mockAuthenticatedLists()
   })
 
   it('registra um usuário (201) e devolve o usuário público na resposta interceptada', () => {

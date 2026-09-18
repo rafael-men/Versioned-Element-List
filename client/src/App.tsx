@@ -4,9 +4,10 @@ import AppLayout from '@/components/app-layout'
 import { ApiProvider, AuthProvider, useAuth } from '@/context/api'
 import Login from '@/pages/auth/Login'
 import Register from '@/pages/auth/Register'
+import { NotFound } from '@/pages/error/NotFound'
 import Home from '@/pages/Home'
 
-function RequireGuest({ children }: { children: ReactNode }) {
+function Require({ children }: { children: ReactNode }) {
   const { token } = useAuth()
   if (token) {
     return <Navigate to="/" replace />
@@ -37,9 +38,9 @@ function App() {
             >
               <Route path="/" element={<Home />} />
             </Route>
-            <Route path="/auth/login" element={<RequireGuest><Login /></RequireGuest>} />
-            <Route path="/auth/register" element={<RequireGuest><Register /></RequireGuest>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/auth/login" element={<Require><Login /></Require>} />
+            <Route path="/auth/register" element={<Require><Register /></Require>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </ApiProvider>

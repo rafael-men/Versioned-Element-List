@@ -70,7 +70,7 @@ function CreateListDialog({ open, onOpenChange, onCreate }: CreateListDialogProp
               id="list-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Ex.: Compras do mês"
+              placeholder="Ex: Compras"
               required
               maxLength={120}
             />

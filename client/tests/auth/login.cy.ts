@@ -1,11 +1,11 @@
 import { randomEmail, randomPassword } from '../utils'
-import { mockAuth, mockAddUser, mockLists } from '../support/mocks'
+import { mockAddUser, mockAuth, mockAuthenticatedLists } from '../support/mocks'
 
 describe('Login de usuário (frontend)', () => {
   beforeEach(() => {
     cy.clearLocalStorage()
     mockAuth()
-    mockLists()
+    mockAuthenticatedLists()
     cy.visit('/auth/login')
   })
 
@@ -35,6 +35,7 @@ describe('Login de usuário (frontend)', () => {
 
     cy.window().its('localStorage').then((store) => {
       expect(store.getItem('vel_token')).to.not.be.null
+      expect(store.getItem('vel_user')).to.contain(email)
     })
   })
 
