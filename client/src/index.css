@@ -3,3 +3,16 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+:root {
+   --font-archivo: "Archivo", sans-serif;
+   --font-forum: "Forum", serif;
+   --font-playfair: "Playfair Display", serif;
+   --font-quicksand: "Quicksand", sans-serif;
+   --font-roboto-slab: "Roboto Slab", serif;
+}
+
+html,
+body,
+#root {
+   font-family: "Archivo", sans-serif;
+}

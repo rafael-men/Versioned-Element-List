@@ -1,5 +1,4 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ChangeType } from '../../domain/enums/change-type';
 import {
   ELEMENT_LIST_REPOSITORY,
   type ElementListRepository,
@@ -16,7 +15,7 @@ export class RestoreListUseCase {
     private readonly lists: ElementListRepository,
     @Inject(LIST_VERSION_REPOSITORY)
     private readonly versions: ListVersionRepository,
-  ) {}
+  ) { }
 
   async execute(userId: string, listId: string, versionNumber: number) {
     const state = await this.lists.findState(userId, listId);
@@ -33,11 +32,12 @@ export class RestoreListUseCase {
       throw new NotFoundException('Versão não encontrada.');
     }
 
-    const updated = await this.lists.commit(userId, listId, {
-      elements: target.elements.map((e) => ({ ...e })),
-      changeType: ChangeType.RESTORE,
-      description: `Lista restaurada para a versão ${versionNumber}.`,
-    });
+    const updated = await this.lists.restore(
+      userId,
+      listId,
+      versionNumber,
+      target.elements.map((e) => ({ ...e })),
+    );
 
     return {
       version: updated!.version,

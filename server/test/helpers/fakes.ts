@@ -79,6 +79,25 @@ export class FakeElementListRepository implements ElementListRepository {
     return updated;
   }
 
+  async restore(
+    userId: string,
+    listId: string,
+    version: number,
+    elements: ElementItem[],
+  ): Promise<ListState | null> {
+    const current = await this.findState(userId, listId);
+    if (!current) return null;
+
+    const updated: ListState = {
+      ...current,
+      version,
+      elements,
+      updatedAt: new Date(),
+    };
+    this.lists.set(listId, updated);
+    return updated;
+  }
+
   async delete(userId: string, listId: string): Promise<boolean> {
     if (this.owners.get(listId) !== userId) return false;
     this.lists.delete(listId);

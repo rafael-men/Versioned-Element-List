@@ -21,6 +21,12 @@ export interface ElementListRepository {
     listId: string,
     change: ListChange,
   ): Promise<ListState | null>;
+  restore(
+    userId: string,
+    listId: string,
+    version: number,
+    elements: ElementItem[],
+  ): Promise<ListState | null>;
   delete(userId: string, listId: string): Promise<boolean>;
 }
 

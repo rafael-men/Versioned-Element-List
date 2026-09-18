@@ -19,7 +19,7 @@ describe('RestoreListUseCase', () => {
     useCase = new RestoreListUseCase(fakeLists, fakeVersions);
   });
 
-  it('restaura o estado de uma versão anterior criando uma nova versão', async () => {
+  it('restaura o estado e o número de uma versão anterior', async () => {
     const userId = randomUUID();
     const state = await fakeLists.create(userId, 'Lista', [
       { id: randomUUID(), content: 'C' },
@@ -42,7 +42,7 @@ describe('RestoreListUseCase', () => {
     const result = await useCase.execute(userId, state.id, 1);
 
     expect(result.restoredFromVersion).toBe(1);
-    expect(result.version).toBe(3);
+    expect(result.version).toBe(1);
     expect(result.elements.map((e) => e.content)).toEqual(['C']);
   });
 
@@ -61,13 +61,13 @@ describe('RestoreListUseCase', () => {
     });
 
     const restored = await useCase.execute(userId, state.id, 1);
-    expect(restored.version).toBe(2);
+    expect(restored.version).toBe(1);
     expect(restored.elements.map((e) => e.content)).toEqual(['X']);
 
     const add = new AddElementUseCase(fakeLists);
     const after = await add.execute(userId, state.id, { content: 'Z' });
 
-    expect(after.version).toBe(3);
+    expect(after.version).toBe(2);
     expect(after.elements.map((e) => e.content)).toEqual(['X', 'Z']);
   });
 

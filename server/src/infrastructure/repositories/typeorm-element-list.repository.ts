@@ -18,7 +18,7 @@ export class TypeOrmElementListRepository implements ElementListRepository {
     private readonly listRepo: Repository<ElementList>,
     @InjectRepository(ListVersion)
     private readonly versionRepo: Repository<ListVersion>,
-  ) {}
+  ) { }
 
   async create(
     userId: string,
@@ -91,6 +91,33 @@ export class TypeOrmElementListRepository implements ElementListRepository {
     await this.insertVersion(list, change);
 
     return this.toState(list, change.elements);
+  }
+
+  async restore(
+    userId: string,
+    listId: string,
+    version: number,
+    elements: ElementItem[],
+  ): Promise<ListState | null> {
+    const list = await this.listRepo.findOne({
+      where: { id: listId, user: { id: userId } },
+      relations: { versions: true },
+    });
+    if (!list) {
+      return null;
+    }
+
+    const newerVersions = list.versions.filter(
+      (item) => item.versionNumber > version,
+    );
+    if (newerVersions.length > 0) {
+      await this.versionRepo.remove(newerVersions);
+    }
+
+    list.currentVersion = version;
+    await this.listRepo.save(list);
+
+    return this.toState(list, elements);
   }
 
   async delete(userId: string, listId: string): Promise<boolean> {
