@@ -4,7 +4,7 @@ import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { ElementItem } from "@/lib/lists"
+import type { ElementItem } from "@/context/lists"
 import PositionSelect from "@/components/positions-select"
 
 interface ElementRowProps {

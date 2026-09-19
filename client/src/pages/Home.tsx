@@ -7,7 +7,7 @@ import ListDetail from '@/components/list-detail'
 import ListOverview from '@/components/list-overview'
 import { Button } from '@/components/ui/button'
 import { useAuth, useListsApi } from '@/context/api'
-import type { ListState, ListSummary } from '@/lib/lists'
+import type { ListState, ListSummary } from '@/context/lists'
 
 function Home() {
   const api = useListsApi()
@@ -18,6 +18,7 @@ function Home() {
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [createOpen, setCreateOpen] = React.useState(false)
+  const creatingListRef = React.useRef(false)
 
   const listError = (err: unknown, fallback: string) =>
     err instanceof Error ? err.message : fallback
@@ -67,11 +68,11 @@ function Home() {
       current.map((summary) =>
         summary.id === next.id
           ? {
-              ...summary,
-              name: next.name,
-              version: next.version,
-              elementCount: next.elements.length,
-            }
+            ...summary,
+            name: next.name,
+            version: next.version,
+            elementCount: next.elements.length,
+          }
           : summary,
       ),
     )
@@ -90,21 +91,29 @@ function Home() {
   }
 
   const handleCreate = async (name: string, elements: string[]) => {
-    const created = await api.createList({
-      name,
-      ...(elements.length > 0 ? { elements } : {}),
-    })
-    setLists((current) => [
-      {
-        id: created.id,
-        name: created.name,
-        version: created.version,
-        elementCount: created.elements.length,
-        createdAt: created.createdAt,
-        updatedAt: created.updatedAt,
-      },
-      ...current,
-    ])
+    if (creatingListRef.current) {
+      return
+    }
+    creatingListRef.current = true
+    try {
+      const created = await api.createList({
+        name,
+        ...(elements.length > 0 ? { elements } : {}),
+      })
+      setLists((current) => [
+        {
+          id: created.id,
+          name: created.name,
+          version: created.version,
+          elementCount: created.elements.length,
+          createdAt: created.createdAt,
+          updatedAt: created.updatedAt,
+        },
+        ...current,
+      ])
+    } finally {
+      creatingListRef.current = false
+    }
   }
 
   return (

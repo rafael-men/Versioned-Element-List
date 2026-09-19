@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useListsApi } from '@/context/api'
-import type { ElementItem, ListHistory, ListState } from '@/lib/lists'
+import type { ElementItem, ListHistory, ListState } from '@/context/lists'
 
 interface ListDetailProps {
   list: ListState

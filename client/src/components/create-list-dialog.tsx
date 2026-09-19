@@ -31,12 +31,14 @@ function CreateListDialog({ open, onOpenChange, onCreate }: CreateListDialogProp
   const [elementsInput, setElementsInput] = React.useState('')
   const [creating, setCreating] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const creatingRef = React.useRef(false)
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!name.trim()) {
+    if (!name.trim() || creatingRef.current) {
       return
     }
+    creatingRef.current = true
     setCreating(true)
     setError(null)
     try {
@@ -49,6 +51,7 @@ function CreateListDialog({ open, onOpenChange, onCreate }: CreateListDialogProp
         err instanceof Error ? err.message : 'Não foi possível criar a lista.',
       )
     } finally {
+      creatingRef.current = false
       setCreating(false)
     }
   }

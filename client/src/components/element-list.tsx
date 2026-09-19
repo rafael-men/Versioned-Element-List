@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 import ElementRow from '@/components/element-row'
-import type { ElementItem } from '@/lib/lists'
+import type { ElementItem } from '@/context/lists'
 
 interface ElementListProps {
   elements: ElementItem[]

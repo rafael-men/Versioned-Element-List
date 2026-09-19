@@ -14,7 +14,7 @@ import type {
   ListHistory,
   ListVersionDetail,
   ListVersionSummary,
-} from '@/lib/lists'
+} from '@/context/lists'
 
 const CHANGE_TYPE_LABEL: Record<string, string> = {
   CREATE: 'Criação',

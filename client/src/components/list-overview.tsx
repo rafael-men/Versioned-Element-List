@@ -2,7 +2,7 @@ import { Loader2, Plus } from 'lucide-react'
 
 import ListCard from '@/components/list-card'
 import { Button } from '@/components/ui/button'
-import type { ListSummary } from '@/lib/lists'
+import type { ListSummary } from '@/context/lists'
 
 interface ListOverviewProps {
   lists: ListSummary[]
@@ -60,6 +60,15 @@ function ListOverview({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      <button
+        type="button"
+        onClick={onOpenCreate}
+        className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/30 bg-transparent text-white/70 transition-all hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/5 hover:text-white sm:col-span-2"
+        aria-label="Criar nova lista"
+      >
+        <Plus className="size-5" />
+        <span className="text-sm font-medium">Nova lista</span>
+      </button>
       {lists.map((summary) => (
         <ListCard key={summary.id} list={summary} onOpen={onOpen} />
       ))}

@@ -86,19 +86,36 @@ A aplicação ficará disponível em `http://localhost:5173` e usará a API em `
 
 - Cadastro e login de usuários.
 - Criação e exclusão de listas.
+- Renomeação de listas.
 - Adição de elementos.
 - Edição de elementos existentes.
 - Remoção de elementos.
 - Reordenação por drag and drop, setas ou seleção de posição.
-- Consulta do histórico de versões.
+- Consulta do histórico de versões, com o tipo de mudança traduzido e a descrição legível de cada versão.
 - Visualização da organização dos elementos em uma versão.
 - Restauração de uma versão anterior.
 
-Cada alteração cria um snapshot completo da lista. Ao restaurar uma versão, o estado escolhido é copiado para uma nova versão marcada como `RESTORE` e  versões anteriores são preservadas. 
+Cada alteração cria um snapshot completo da lista e uma nova versão com um dos oito tipos de mudança (`CREATE`, `ADD`, `EDIT`, `REMOVE`, `REORDER`, `RENAME`, `REPLACE`, `RESTORE`). Ao restaurar uma versão, o estado escolhido é copiado para uma nova versão marcada como `RESTORE` e as versões anteriores são preservadas.
+
+Além da interface, a API também expõe:
+
+- Substituição total da lista (nome + todos os elementos) em uma única operação (`PUT /lists/:id`, versão `REPLACE`).
+- Edição em lote de vários elementos numa única requisição (`PATCH /lists/:id`, gera uma única versão `EDIT`).
+- Consulta de uma versão específica (`GET /lists/:id/versions/:n`).
+- Documentação interativa (Swagger) em `http://localhost:4000/api-docs`.
+
+## Segurança
+
+- Senhas armazenadas com `scrypt` + salt aleatório (16 bytes) e comparação em tempo constante.
+- Autenticação via JWT com expiração configurável (`JWT_EXPIRES_IN`, padrão de 7 dias).
+- Política de senha forte: mínimo de 6 caracteres, com pelo menos um número, uma letra maiúscula e uma minúscula.
+- E-mail normalizado (removidos espaços e convertido para minúsculas) no cadastro e no login.
+- Sanitização de texto anti-XSS em todas as entradas: remoção de espaços nas pontas, rejeição de caracteres de controle e escape de HTML.
+- Helmet com CSP restrita, CORS com origem única configurável e credenciais, e autorização por proprietário (listas de outros usuários retornam `404`).
 
 ## Arquitetura
 
-O backend é organizado em camadas:
+O backend é organizado em Clean Architecture:
 
 - `application`: controllers, DTOs e casos de uso.
 - `domain`: entidades, modelos e enums de negócio.
@@ -113,9 +130,11 @@ As tabelas principais são:
 
 - `users`: usuários autenticados.
 - `element_lists`: nome, proprietário e versão atual da lista.
-- `list_versions`: snapshots JSON dos elementos, tipo da alteração, descrição e data.
+- `list_versions`: snapshots JSON dos elementos, tipo da mudança, descrição e data.
 
-Cada operação de alteração cria um novo registro em `list_versions`. A versão atual aponta para o maior número de versão, e a restauração cria outro snapshot sem apagar o histórico anterior.
+Cada operação de alteração cria um novo registro em `list_versions`, com uma descrição legível gerada automaticamente (por exemplo: "Elemento adicionado: ...", "Elemento movido para a posição ..." ou "Restaurada a partir da versão ..."). A versão atual aponta para o maior número de versão, e a restauração cria outro snapshot sem apagar o histórico anterior.
+
+Limitações de entrada: nome da lista com até 120 caracteres, conteúdo de elemento com até 2000 caracteres e no máximo 500 elementos por lista; a posição de reordenação é validada dentro dos limites do array.
 
 ## Testes
 
@@ -152,16 +171,3 @@ npm run test:e2e
 ```
 
 Para executar o Cypress em modo interativo, inicie o frontend e use `npm run test:e2e:open` dentro de `client`.
-
-## Decisões e limitações
-
-- Os snapshots completos simplificam a consulta e a restauração, ao custo de armazenar o estado inteiro a cada alteração.
-- O TypeORM está configurado com `synchronize: true` para facilitar o desenvolvimento local. Em produção, use migrations e desative essa opção.
-- O frontend depende do backend e do banco para carregar listas e históricos.
-- A configuração padrão usa `localhost`; em ambientes diferentes, ajuste `CORS_ORIGIN`, `VITE_API_BASE_URL` e as variáveis do banco.
-
-## Entrega
-
-Inclua o código-fonte, `package.json`, arquivos de configuração, Docker Compose e documentação. Não inclua `node_modules`, diretórios `dist` ou `coverage`, arquivos `.env`, senhas, tokens ou qualquer informação pessoal.
-
-# Versioned-Element-List

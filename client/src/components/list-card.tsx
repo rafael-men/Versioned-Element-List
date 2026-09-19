@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { ListSummary } from "@/lib/lists"
+import type { ListSummary } from "@/context/lists"
 
 interface ListCardProps {
   list: ListSummary
